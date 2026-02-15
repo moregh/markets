@@ -2,6 +2,8 @@
 FROM rust:1.92-slim AS builder
 
 ENV CARGO_HOME=/usr/local/cargo
+ARG RUSTFLAGS="-C target-cpu=native"
+ENV RUSTFLAGS=${RUSTFLAGS}
 
 WORKDIR /build/rust_api
 

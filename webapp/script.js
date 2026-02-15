@@ -1,9 +1,10 @@
 // script.js
 // If served from http(s), default API host to same hostname on port 8000.
 // If opened as file://, fall back to localhost.
+const apiHost = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
 const API_BASE = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
-    ? `${window.location.protocol}//${window.location.hostname}:8000`
-    : 'http://localhost:8000';
+    ? `${window.location.protocol}//${apiHost}:8000`
+    : 'http://127.0.0.1:8000';
 let authToken = null;
 let refreshToken = null;
 let refreshInFlight = null;
