@@ -1,0 +1,493 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <h1>Trading System</h1>
+            <div class="login-tabs">
+                <button type="button" class="login-tab active" onclick="switchLoginTab('login', this)">Login</button>
+                <button type="button" class="login-tab" onclick="switchLoginTab('register', this)">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="login-form active">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password">
+                </div>
+                <button class="btn-primary" onclick="login()">Login</button>
+                <div id="loginError" class="error-message"></div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="login-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="registerUsername" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" placeholder="Enter password">
+                </div>
+                <button class="btn-primary" onclick="register()">Register</button>
+                <div id="registerError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app" style="display: none;">
+        <div class="app-layout">
+            <aside class="app-sidebar">
+                <div class="sidebar-title">Workspace</div>
+                <div class="main-tabs">
+                    <button class="main-tab active" data-tab="markets">Markets</button>
+                    <div id="sidebarMarketListWrap" class="sidebar-market-wrap">
+                        <div id="sidebarMarketList" class="sidebar-market-list"></div>
+                    </div>
+                    <button class="main-tab" data-tab="wallet">My Wallet</button>
+                    <button class="main-tab" data-tab="admin" id="adminTab" style="display: none;">Admin</button>
+                </div>
+                <div class="sidebar-summary">
+                    <div class="sidebar-summary-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Active Orders</span>
+                            <span class="stat-value" id="activeOrders">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Active Buys</span>
+                            <span class="stat-value" id="activeBuyOrders">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Active Sells</span>
+                            <span class="stat-value" id="activeSellOrders">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Matches (1h)</span>
+                            <span class="stat-value" id="matchesLastHour">-</span>
+                        </div>
+                    </div>
+                    <div class="sidebar-user">
+                        <div class="stat-item">
+                            <span class="stat-label">User</span>
+                            <span class="stat-value" id="currentUsername">-</span>
+                        </div>
+                        <button class="btn-logout" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="app-main">
+                <!-- Markets Tab -->
+                <div id="markets" class="tab-panel active">
+                    <div class="trading-view">
+                    <div id="noMarketSelected" class="no-selection">
+                        <p>Select a market to begin trading</p>
+                    </div>
+
+                    <div id="marketContent" class="market-content" style="display: none;">
+                        <!-- Order Book and Recent Trades -->
+                        <div class="trading-row">
+                            <!-- Order Book (2/3 width) -->
+                            <div class="orderbook-container">
+                                <div class="orderbook-title-row">
+                                    <div class="orderbook-heading-line">
+                                        <h3 class="section-title"><span id="currentMarket">-</span></h3>
+                                        <div class="market-wallet-holdings">
+                                            <span class="holding-pill"><span id="marketWalletProduct">-</span></span>
+                                            <span class="holding-pill"><span id="marketWalletCurrency">-</span></span>
+                                            <button type="button" class="btn-secondary trade-launch-btn" id="openTradePanelBtn">Trade</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sell Orders -->
+                                <div class="orderbook-section sells-section">
+                                    <div id="sellOrders" class="orderbook-orders"></div>
+                                </div>
+
+                                <div class="orderbook-delta-bar">
+                                    <div class="orderbook-delta-cell">
+                                        <span class="delta-label">Δ Price</span>
+                                        <span class="delta-value" id="orderbookDeltaPrice">-</span>
+                                    </div>
+                                    <div class="orderbook-delta-cell">
+                                        <span class="delta-label">Δ Qty</span>
+                                        <span class="delta-value" id="orderbookDeltaQty">-</span>
+                                    </div>
+                                    <div class="orderbook-delta-cell">
+                                        <span class="delta-label">Δ Value</span>
+                                        <span class="delta-value" id="orderbookDeltaValue">-</span>
+                                    </div>
+                                    <div class="orderbook-delta-cell">
+                                        <span class="delta-label">Δ Expiry</span>
+                                        <span class="delta-value" id="orderbookDeltaExpiry">-</span>
+                                    </div>
+                                    <div class="orderbook-delta-cell orderbook-delta-empty"></div>
+                                </div>
+
+                                <!-- Buy Orders -->
+                                <div class="orderbook-section buys-section">
+                                    <div id="buyOrders" class="orderbook-orders"></div>
+                                </div>
+                            </div>
+
+                            <div class="trades-column">
+                                <div class="trades-container">
+                                    <h3 class="section-title">Recent Trades</h3>
+                                    <div class="trades-header">
+                                        <span></span>
+                                        <span>Price</span>
+                                        <span>Qty</span>
+                                        <span>Value</span>
+                                    </div>
+                                    <div id="recentTrades" class="trades-list"></div>
+                                </div>
+                            </div>
+
+                            <div class="analytics-column">
+                                <div class="market-metrics-grid metrics-side-panel">
+                                    <div class="market-metric-group metric-pricing">
+                                        <h4>Pricing</h4>
+                                        <div class="market-stat-inline"><span class="stat-label">Best Bid</span><span class="stat-value" id="bestBidValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Best Ask</span><span class="stat-value" id="bestAskValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Mid</span><span class="stat-value" id="midPriceValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Spread</span><span class="stat-value" id="spreadValue">-</span></div>
+                                    </div>
+                                    <div class="market-metric-group metric-depth">
+                                        <h4>Depth</h4>
+                                        <div class="market-stat-inline"><span class="stat-label">Total Buy Qty</span><span class="stat-value" id="totalBuyQtyValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Total Sell Qty</span><span class="stat-value" id="totalSellQtyValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Qty Delta</span><span class="stat-value" id="qtyDeltaValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Queue Total</span><span class="stat-value" id="totalQueueQtyValue">-</span></div>
+                                    </div>
+                                    <div class="market-metric-group metric-activity">
+                                        <h4>Activity</h4>
+                                        <div class="market-stat-inline"><span class="stat-label">Active Buys</span><span class="stat-value" id="activeBuys">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Active Sells</span><span class="stat-value" id="activeSells">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Active Delta</span><span class="stat-value" id="orderDeltaValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Pressure</span><span class="stat-value" id="pressureValue">-</span></div>
+                                    </div>
+                                    <div class="market-metric-group metric-volume">
+                                        <h4>Value</h4>
+                                        <div class="market-stat-inline"><span class="stat-label">Buy</span><span class="stat-value" id="totalBuyValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Sell</span><span class="stat-value" id="totalSellValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Delta</span><span class="stat-value" id="valueDeltaValue">-</span></div>
+                                        <div class="market-stat-inline"><span class="stat-label">Book</span><span class="stat-value" id="totalBookValue">-</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Price Chart -->
+                                <div class="market-chart-container">
+                                    <div class="chart-title-row">
+                                        <h3 class="section-title">Last Minute</h3>
+                                        <div class="chart-meta">
+                                            <span class="chart-meta-label">Last</span>
+                                            <span class="chart-meta-value" id="chartLastPrice">-</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="marketPriceChart" class="market-price-canvas"></canvas>
+                                </div>
+
+                                <!-- Secondary Market Stats Chart -->
+                                <div class="market-chart-container market-pulse-container">
+                                    <div class="chart-title-row">
+                                        <h3 class="section-title">Market Pulse</h3>
+                                        <div class="chart-meta">
+                                            <span class="chart-meta-label">Spread</span>
+                                            <span class="chart-meta-value" id="pulseSpreadValue">-</span>
+                                            <span class="chart-meta-label">Imbalance</span>
+                                            <span class="chart-meta-value" id="pulseImbalanceValue">-</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="marketPulseChart" class="market-price-canvas"></canvas>
+                                </div>
+
+                                <div class="market-chart-container">
+                                    <div class="chart-title-row">
+                                        <h3 class="section-title">Volume (1m)</h3>
+                                        <div class="chart-meta">
+                                            <span class="chart-meta-label">Total Qty</span>
+                                            <span class="chart-meta-value" id="volumeLastMinuteValue">-</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="marketVolumeChart" class="market-price-canvas"></canvas>
+                                </div>
+
+                                <div class="market-chart-container">
+                                    <div class="chart-title-row">
+                                        <h3 class="section-title">Value (1m)</h3>
+                                        <div class="chart-meta">
+                                            <span class="chart-meta-label">Total Value</span>
+                                            <span class="chart-meta-value" id="valueLastMinuteValue">-</span>
+                                        </div>
+                                    </div>
+                                    <canvas id="marketValueChart" class="market-price-canvas"></canvas>
+                                </div>
+                            </div>
+
+                            <aside id="tradePanel" class="trade-panel">
+                                <div class="trade-panel-header">
+                                    <h3 class="section-title">Trade</h3>
+                                    <button type="button" class="btn-secondary trade-close-btn" id="closeTradePanelBtn">Close</button>
+                                </div>
+                                <div class="trade-panel-mode">
+                                    <span id="tradeModeBadge" class="trade-mode-badge">LIMIT</span>
+                                    <span id="tradeModeHint" class="trade-mode-hint">Manual order entry</span>
+                                </div>
+                                <div class="trade-form">
+                                    <div class="form-group">
+                                        <label>Direction</label>
+                                        <select id="tradeDirection">
+                                            <option value="true">BUY</option>
+                                            <option value="false">SELL</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Price</label>
+                                        <input type="number" id="tradePrice" placeholder="Price" step="0.01">
+                                    </div>
+                                    <div class="form-group trade-qty-group">
+                                        <label>Quantity</label>
+                                        <div class="trade-qty-inline">
+                                            <input type="number" id="tradeQuantity" placeholder="Quantity" step="1" min="1">
+                                            <button type="button" class="btn-secondary" id="tradeMaxBtn">Max</button>
+                                        </div>
+                                        <div id="tradeCapacityHint" class="trade-capacity-hint">Max: -</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Duration (sec)</label>
+                                        <input type="number" id="tradeDuration" min="1" placeholder="blank = no expiry">
+                                    </div>
+                                    <div class="trade-actions-row">
+                                        <button class="btn-primary" id="tradeSubmitBtn" onclick="submitTradePanel()">Place Order</button>
+                                    </div>
+                                </div>
+                                <div id="placeOrderResult" class="result-message"></div>
+                            </aside>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- My Wallet Tab -->
+                <div id="wallet" class="tab-panel">
+                    <div class="content-wrapper">
+                        <div class="wallet-grid">
+                            <div class="panel">
+                                <h3>Currency Balances</h3>
+                                <div id="currencyBalances" class="balance-list"></div>
+                            </div>
+                            <div class="panel">
+                                <h3>Product Balances</h3>
+                                <div id="productBalances" class="balance-list"></div>
+                            </div>
+                        </div>
+                        <div class="panel-grid wallet-actions-grid">
+                            <div class="panel">
+                                <h3>Account Security</h3>
+                                <div class="form-group">
+                                    <label>Current Password</label>
+                                    <input type="password" id="walletCurrentPassword" placeholder="Current password">
+                                </div>
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" id="walletNewPassword" placeholder="New password (min 8 chars)">
+                                </div>
+                                <button class="btn-primary" onclick="changeMyPassword()">Update Password</button>
+                                <div id="walletPasswordResult" class="result-message"></div>
+                            </div>
+                            <div class="panel">
+                                <h3>Withdraw Currency</h3>
+                                <div class="form-group">
+                                    <label>Currency</label>
+                                    <input type="text" id="walletWithdrawCurrency" value="EUR" placeholder="e.g. EUR">
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <input type="number" id="walletWithdrawCurrencyAmount" step="0.01" min="0.01" placeholder="e.g. 10.00">
+                                </div>
+                                <button class="btn-danger" onclick="withdrawMyCurrency()">Withdraw Currency</button>
+                                <div id="walletWithdrawCurrencyResult" class="result-message"></div>
+                            </div>
+                            <div class="panel">
+                                <h3>Withdraw Product</h3>
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <input type="text" id="walletWithdrawProduct" value="BTC" placeholder="e.g. BTC">
+                                </div>
+                                <div class="form-group">
+                                    <label>Units</label>
+                                    <input type="number" id="walletWithdrawProductUnits" step="1" min="1" placeholder="e.g. 1">
+                                </div>
+                                <button class="btn-danger" onclick="withdrawMyProduct()">Withdraw Product</button>
+                                <div id="walletWithdrawProductResult" class="result-message"></div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>Wallet Detail Metrics</h3>
+                            <div id="walletDetailMetrics" class="admin-fees-list"></div>
+                        </div>
+                        <div class="panel wallet-insights-panel">
+                            <h3>Wallet Insights</h3>
+                            <div id="walletInsights" class="wallet-insights-list"></div>
+                        </div>
+                        <div class="panel wallet-orders-panel">
+                            <div id="walletOrdersResult" class="result-message"></div>
+                            <div id="walletOrdersList" class="orders-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+	                <!-- Admin Tab -->
+	                <div id="admin" class="tab-panel">
+	                    <div class="content-wrapper">
+	                        <div class="panel-grid">
+	                            <div class="panel">
+	                                <h3>Fees Collected</h3>
+	                                <p>Total fees credited to the platform account, by currency.</p>
+	                                <button class="btn-primary" onclick="adminGetFeesCollected()">Refresh</button>
+	                                <div id="adminFeesCollectedUpdated" class="admin-meta"></div>
+	                                <div id="adminFeesCollectedList" class="admin-fees-list"></div>
+	                                <div id="adminFeesCollectedResult" class="result-message"></div>
+	                            </div>
+
+	                            <div class="panel">
+	                                <h3>Fee Configuration</h3>
+	                                <p>Applied to completed sell contracts. Example: 0.005 = 0.5%.</p>
+	                                <div class="form-group">
+	                                    <label>Seller Fee Rate</label>
+	                                    <input type="number" id="adminFeeRate" placeholder="0.005" step="0.000001" min="0" max="1">
+	                                </div>
+	                                <button class="btn-primary" onclick="adminSetFeeConfig()">Update Fee Rate</button>
+	                                <button class="btn-secondary" onclick="adminLoadFeeConfig()">Reload</button>
+	                                <div id="adminFeeConfigResult" class="result-message"></div>
+	                            </div>
+
+	                            <div class="panel">
+	                                <h3>Dev Topup Users</h3>
+	                                <p>Credits all users with id greater than the given minimum.</p>
+	                                <div class="form-group">
+	                                    <label>Min User ID</label>
+	                                    <input type="number" id="adminTopupMinUserId" value="1" min="1">
+	                                </div>
+	                                <div class="form-group">
+	                                    <label>Currency Amount (each currency)</label>
+	                                    <input type="number" id="adminTopupCurrencyAmount" value="100000.00" step="0.01" min="0">
+	                                </div>
+	                                <div class="form-group">
+	                                    <label>Product Units (each product)</label>
+	                                    <input type="number" id="adminTopupProductUnits" value="1000" step="1" min="1">
+	                                </div>
+	                                <button class="btn-primary" onclick="adminDevTopup()">Topup Users</button>
+	                                <div id="adminTopupResult" class="result-message"></div>
+	                            </div>
+
+                                <div class="panel">
+                                    <h3>User Directory</h3>
+                                    <button class="btn-secondary" onclick="adminLoadUsers()">Refresh Users</button>
+                                    <div id="adminUsersResult" class="result-message"></div>
+                                    <div id="adminSelectedUserBanner" class="admin-meta">No user selected.</div>
+                                    <div id="adminUsersList" class="admin-users-list"></div>
+                                </div>
+
+                                <div class="panel">
+                                    <h3>Selected User Profile</h3>
+                                    <div class="form-group">
+                                        <label>User ID</label>
+                                        <input type="number" id="adminSelectedUserId" min="1" placeholder="Select from directory">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Username</label>
+                                        <input type="text" id="adminSelectedUsername" placeholder="Username">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" id="adminSelectedEmail" placeholder="Email">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Admin Access</label>
+                                        <select id="adminSelectedIsAdmin">
+                                            <option value="false">User</option>
+                                            <option value="true">Admin</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn-primary" onclick="adminUpdateSelectedUser()">Update User</button>
+                                    <div class="form-group">
+                                        <label>Reset Password</label>
+                                        <input type="password" id="adminSelectedPassword" placeholder="New password">
+                                    </div>
+                                    <button class="btn-danger" onclick="adminResetSelectedUserPassword()">Reset Password</button>
+                                    <div id="adminUserProfileResult" class="result-message"></div>
+                                </div>
+
+                                <div class="panel">
+                                    <h3>Adjust Selected User Wallet</h3>
+                                    <p>Use signed values: positive = deposit, negative = withdrawal.</p>
+                                    <div class="form-group">
+                                        <label>Currency</label>
+                                        <input type="text" id="adminAdjustCurrencyCode" value="EUR" placeholder="e.g. EUR">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Amount</label>
+                                        <input type="number" id="adminAdjustCurrencyAmount" step="0.01" placeholder="e.g. 25.50 or -5.50">
+                                    </div>
+                                    <button class="btn-primary" onclick="adminAdjustSelectedUserCurrency()">Adjust Currency</button>
+                                    <div class="form-group">
+                                        <label>Product</label>
+                                        <input type="text" id="adminAdjustProductCode" value="BTC" placeholder="e.g. BTC">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Units</label>
+                                        <input type="number" id="adminAdjustProductUnits" step="1" placeholder="e.g. 10 or -2">
+                                    </div>
+                                    <button class="btn-primary" onclick="adminAdjustSelectedUserProduct()">Adjust Product</button>
+                                    <div class="form-group">
+                                        <label>Reason</label>
+                                        <input type="text" id="adminAdjustReason" placeholder="Optional reason">
+                                    </div>
+                                    <div id="adminUserWalletAdjustResult" class="result-message"></div>
+                                </div>
+
+                                <div class="panel">
+                                    <h3>Selected User Account Snapshot</h3>
+                                    <button class="btn-secondary" onclick="adminLoadSelectedUserAccount()">Reload Snapshot</button>
+                                    <div id="adminUserAccountResult" class="result-message"></div>
+                                    <div id="adminSelectedUserStats" class="admin-fees-list"></div>
+                                    <div id="adminSelectedUserWallet" class="admin-json-scroll"></div>
+                                </div>
+
+                                <div class="panel">
+                                    <h3>Engine Diagnostics</h3>
+                                    <button class="btn-secondary" onclick="adminLoadPerf()">Load Perf</button>
+                                    <button class="btn-secondary" onclick="adminLoadTxJournal()">Load Tx Journal</button>
+                                    <div id="adminDiagnosticsResult" class="result-message"></div>
+                                    <div id="adminPerfSnapshot" class="admin-json-scroll"></div>
+                                    <div id="adminTxJournalSnapshot" class="admin-json-scroll" style="margin-top:10px;"></div>
+                                </div>
+	                        </div>
+	                    </div>
+	                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
